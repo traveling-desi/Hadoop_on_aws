@@ -1,0 +1,19 @@
+Subreddit Love Index
+Write a mapper and reducer that counts the words "love" and "hate" in comments and calculate what I'm calling the "love index" for each subreddit. The love index is the difference in love and hate counts, divided by the sum:
+
+Love index
+
+This is a sort of normalized measure of love. It ranges from 1 (all the love) to -1 (too much hate), taking into account the total number of love and hate comments. This makes it so big subreddits with a bunch of comments are on the same scale as small subreddits.
+
+Which subreddit has the highest love index? Which has the lowest love index?
+
+You might find it useful to use the csv module to parse each line of the input file.
+
+
+People love receiving gifts
+You should have found that the most love was in the Random_Acts_of_Amazon subreddit. In this subreddit, people send gifts from Amazon wishlists. Pretty clear why there is a lot of love there.
+
+Can we get more love?
+The least love should be in the ukpolitics subreddit. Looking back, the UK general election was on May 8, 2015 when the Conservative party won over the Labour party. There's few things like politics to bring out the word "hate."
+
+

@@ -1,0 +1,52 @@
+Analyzing Reddit comments
+In this problem set, you'll be looking at a dataset of Reddit comments from May 2015. If you don't know about Reddit, it's a website where users submit posts, then other users vote on the posts. If the posts get a lot of positive posts (upvotes), then the post has a higher rank and is placed higher on the page. The site is really a collection of subreddits, user-created communities each centered around a specific topic. For instance, this Hadoop subreddit.
+
+This dataset comes from Kaggle. The whole dataset is a ~30 GB SQLite database, but I selected the top 100 subreddits based on comment count, resulting in a ~4.5 GB file.
+
+Disclaimer: This data is from the internet, so there is almost certainly offensive stuff in there. I've filtered out some of it, and if you don't go searching for offensive things, you shouldn't see anything too bad.
+
+The data
+The data is a CSV file with columns separated with tabs. The columns are: subreddit, author, body, created_utc, ups, downs, gilded, archived. For each comment,
+
+subreddit: The subreddit the comment was posted in
+author: Username of the comment author
+body: Comment text
+create_utc: UTC timestamp of when the comment was posted
+ups: Comment upvotes
+downs: Comment downvotes
+gilded: 1 if the user was given Reddit gold for the comment, 0 otherwise
+archived: 1 if the comment was archived, 0 otherwise
+Instructions to get you started
+You're going to be moving files between your machine and the hdfs user home folder on the NameNode. To make this easier, you'll need to allow access over SSH. On the NameNode:
+
+$ sudo cp -r  ~/.ssh /home/hdfs
+$ sudo chown -R hdfs /home/hdfs/.ssh
+This copies the SSH authorized_users file to the hdfs user and changes the owner to hdfs to give it read permission. Now you'll need to change your user to hdfs and go to the home directory.
+
+$ sudo su hdfs
+$ cd ~
+If you need to go back to the default user, ubuntu, just use
+
+$ exit
+Next, create a home directory in HDFS,
+
+$ hdfs dfs -mkdir /user/hdfs
+Time to get the data. Download the data from Udacity. It's compressed, so you'll need to extract it too:
+
+$ wget https://s3.amazonaws.com/content.udacity-data.com/courses/ud1000/data/comments.tar.gz
+$ tar -zxvf comments.tar.gz
+This should create the file comments.csv. As you work on the MapReduce code, you'll want to test it on a smaller dataset. Make a small sample from the big data file, then copy it to your machine.
+
+$ head -10000 comments.csv > testdata
+On your machine, copy testdata from the NameNode:
+
+$ scp -i /path/to/key_file.pem hdfs@namenode_hostname:~/testdata testdata
+To run a Hadoop streaming job, you'll want to use hadoop-streaming-*.jar, where the * is a wildcard that represents some version numbers. You can find where it's located with find:
+
+$ find / -name 'hadoop-streaming-*'
+My path to the file was quite long and I didn't want to type it in everytime, so I saved it to a variable:
+
+$ export HADOOP_STREAM=/path/to/hadoop-streaming-*.jar
+And to run the Hadoop streaming job,
+
+$ hadoop jar $HADOOP_STREAM -files mapper.py,reducer.py -input comments.csv -output output_dir -mapper mapper.py -reducer reducer.py
