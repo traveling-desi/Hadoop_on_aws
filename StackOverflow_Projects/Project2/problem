@@ -1,0 +1,10 @@
+Average number of answers
+Write a mapper and reducer that calculates the average number of answers for each tag. The output should look like:
+
+tag1 2.23
+tag2 1.76
+tag3 0.1
+...
+What's the tag with the highest average number of answers?
+
+Here, either 'mnemonics' or 'procrastination' would be correct, posts tagged with them have 5.5 answers on average.

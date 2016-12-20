@@ -1,0 +1,16 @@
+Post views and scores
+Suppose you want to know how view counts correlate with score, but only for posts that have been answered. Write a MapReduce program that makes a new dataset with the view counts and the score only for posts with at least one answer. What's the highest score and how many views did that post have?
+
+This doesn't actually need a reducer since you are just filtering and writing out the results. You can set the number of reducers to zero by including the option -D mapred.reduce.tasks=0. This makes it so no reducers run, and the output from the mapper is the final output.
+
+Your command to run the MapReduce job should look like
+
+$ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar -D mapred.reduce.tasks=0 -files mapper.py -input Posts.xml -output scores -mapper mapper.py 
+The output folder should contain files called something like part-00000. You can concatenate them together, then sort the result with the following command.
+
+$ hdfs dfs -get scores
+$ cat scores/part-* | sort -n -k 2 | tail
+The first line copies the output folder scores from HDFS to your current directory. The second line first concatenates all the files starting with part-, then sorts the concatenated file. The options -n -k 2 tell sort to use numerical sorting on the second column. And finally, tail displays the last five rows of the sorted output.
+
+
+The highest score was 1586, with 169360 views.

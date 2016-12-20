@@ -1,0 +1,82 @@
+Looking at superuser.com posts
+Now you'll get some practice using your cluster for analysis. You'll look at a dataset of posts from superuser.com, a StackExchange community, and answer some questions by writing MapReduce programs. I suggest using Hadoop streaming to write your MapReduce programs with Python. If you need a refresher, check out our Intro the Hadoop and MapReduce course.
+
+First, you'll want to download the data onto your cluster with wget, then load it into HDFS. On your NameNode:
+
+$ cd ~
+$ wget https://s3.amazonaws.com/content.udacity-data.com/courses/ud1000/data/Posts.xml
+$ hdfs dfs -put Posts.xml
+It's typically a good idea to look at the first few lines of any new dataset, just to see what's going on in there. This is simple with the head command.
+
+$ head -5 Posts.xml
+You should see something like:
+
+<?xml version="1.0" encoding="utf-8"?>
+<posts>
+  <row Id="1" PostTypeId="1" AcceptedAnswerId="727273" CreationDate="2009-07-15T06:27:46.723" Score="146" ViewCount="85846" Body="text here" OwnerUserId="1" LastEditorUserId="73637" LastEditDate="2011-09-22T03:20:53.867" LastActivityDate="2014-10-18T07:23:25.843" Title="Why does the /winsxs folder grow so large, and can it be made smaller?" Tags="&lt;windows&gt;&lt;disk-space&gt;&lt;winsxs&gt;" AnswerCount="9" CommentCount="9" FavoriteCount="78" />
+  <row Id="24" PostTypeId="1" CreationDate="2009-07-08T16:32:47.817" Score="6" ViewCount="4827" Body="text here" OwnerDisplayName="essamSALAH" LastEditorUserId="36744" LastEditDate="2012-08-08T21:06:48.087" LastActivityDate="2012-08-08T21:06:48.087" Title="How can I remove noise from an audio recording?" Tags="&lt;audio&gt;&lt;audio-recording&gt;&lt;camtasia&gt;" AnswerCount="6" CommentCount="0" FavoriteCount="3" />
+  <row Id="25" PostTypeId="2" ParentId="24" CreationDate="2009-07-08T16:34:52.867" Score="0" Body="text here" OwnerUserId="9637" OwnerDisplayName="Burkhard" LastActivityDate="2009-07-15T06:48:44.300" CommentCount="0" />
+
+The file Posts.xml is - unsurprisingly - an XML file. You can see that the first two rows don't contain data about posts. The other lines, the ones that start with <row, contain the actual post data, each row is one post. You'll want to use an XML parser to extact the data. The Python standard library gives us ElementTree for this. It's simple to create a parser in the mapper code:
+
+#!/usr/bin/env python
+
+import sys
+import xml.etree.ElementTree as ET
+
+def mapper():
+    for row in sys.stdin:
+        # Strip whitespace from the row
+        row = row.strip()
+        # Make sure we're working with post data
+        if not row.startswith('<row'):
+            continue
+
+        # Create the parser!
+        parser = ET.fromstring(row)
+
+        ... the rest of the mapper ...
+The parser creates a dictionary-like structure from the XML row. You can look at the contents with parser.items(). I copied a row into an IPython terminal to experiment with the parser. You should see something like this if you do the same:
+
+In [1]: parser = ET.fromstring(row)
+
+In [2]: parser.items()
+Out[2]: 
+[('Body',
+  "text here"),
+ ('ViewCount', '1191'),
+ ('Title',
+  'Why does the Macbook Pro Unibody crash on hibernate under Windows?'),
+ ('LastActivityDate', '2009-07-15T21:15:21.323'),
+ ('AnswerCount', '3'),
+ ('CommentCount', '2'),
+ ('AcceptedAnswerId', '3841'),
+ ('Score', '4'),
+ ('PostTypeId', '1'),
+ ('OwnerUserId', '26'),
+ ('Tags', '<mac><crash><boot-camp>'),
+ ('CreationDate', '2009-07-15T07:17:13.970'),
+ ('FavoriteCount', '1'),
+ ('Id', '37')]
+You can see the various fields contained in the row. If you want to access a field, you can use parser.get(). For example,
+
+In [3]: parser.get('Score')
+Out[3]: '4' 
+Finally, it's a good idea to test your mapper and reducer on a small sample of your data. On the NameNode, create a small file from Posts.xml.
+
+$ head -10000 Posts.xml > testdata
+Then, on your local machine, copy testdata from the NameNode:
+
+$ scp namenode:~/testdata testdata
+To easily test out your mapper and reducer:
+
+$ cat testdata | mapper.py | sort | reducer.py
+This sends testdata into mapper.py, then sorts the output of the mapper, then sends the sorted data into reducer.py. It's a good idea to make sure your mapper and reducer are working on your local machine before running the code on the cluster.
+
+When your mapper and reducer are ready, copy them onto the NameNode:
+
+$ scp mapper.py reducer.py namenode:~
+Then to run the MapReduce job with Hadoop streaming, enter (on the NameNode)
+
+$ hadoop jar $HADOOP_HOME/share/hadoop/tools/lib/hadoop-streaming-*.jar -files "mapper.py,reducer.py" -input Posts.xml -output output_folder -mapper mapper.py -reducer reducer.py
+This should get you started with the problem set!

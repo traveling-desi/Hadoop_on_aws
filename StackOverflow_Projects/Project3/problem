@@ -1,0 +1,17 @@
+Average post lifetime
+What is the average lifetime of a post? That is, what's the average time between creation and last activity, in days?
+
+You can find the creation time and last activity time with the fields 'CreationDate' and 'LastActivityDate'. The dates are strings formatted like '2009-07-15T07:17:13.970'. You'll need to use the datetime module to convert these strings into date objects so you can find the time difference. For example:
+
+from datetime import datetime
+
+# Your stuff here
+
+first = parser.get('CreationDate')
+first_dt = datetime.strptime(first, '%Y-%m-%dT%X.%f')
+
+# More stuff here
+
+
+
+I found that the average post lifetime was 124.54 days.
