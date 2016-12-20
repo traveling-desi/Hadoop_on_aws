@@ -1,0 +1,29 @@
+
+Run a MapReduce job using the mapper.py and reduce.py provided to you.
+
+Using the results of the MapReduce job you just did, which five days had the most hits to the main webpage? The output of your MapReduce code will likely be spread out in multiple files. You'll need to do a bit of analysis to combine the data files and sort them. Enter your dates in the format YYYY-MM-DD, one date on each line.
+
+
+Which five days has the most hits to the main webpage? Enter your dates in the format YYYY-MM-DD, one date on each line.
+
+
+
+First, I downloaded the output files from the S3 bucket to my computer. To find the days with the most hits, I threw together a few shell commands with pipes: cat part* | sort -n -k 2 | tail -5.
+
+Here
+
+cat part* 
+concatenates all files in the directory starting with 'part', these are the output files. The next command,
+
+| sort -n -k 2
+pipes the output of cat part* to the sort program. The options -n -k 2 say to use numeric sorting on the second column, the number of hits each day. Finally,
+
+| tail -5
+prints out the last five rows, the five days with the most hits:
+
+2011-09-29    236
+2011-07-13    265
+2010-11-26    268
+2011-07-15    290
+2011-07-14    299
+There are many ways to do this, a short Python script for instance. Often, composing bash commands can be much simpler.

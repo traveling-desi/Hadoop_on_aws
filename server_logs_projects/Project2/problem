@@ -1,0 +1,20 @@
+Now, time for you to write a mapper and a reducer, then use your EMR cluster to answer a question. If you need help with this, see our Intro to Hadoop and MapReduce course, specifically Lesson 4.
+
+What is the average number of hits on Saturday? Write a mapper and reducer that calculates the average hits for each day of the week and use EMR to run the job.
+
+By default, EMR will use multiple reducers and you'll get multiple output files, one for each reducer. To tell EMR to use one reducer, add -D mapreduce.job.reduces=1 to the "Arguments" box when creating the step.
+
+You can find the weekday from the "date" field in the following fashion:
+
+from datetime import datetime
+weekday = datetime.strptime(date, "%Y-%m-%d").weekday()
+then use weekday as the output key.
+
+
+0	5870
+1	5998
+2	7144
+3	6389
+4	5621
+5	4086
+6	4282
